@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0f18">
+<meta name="description" content="Layanan informasi pajak kendaraan Kalimantan Timur.">
+<title>e-Pajak Kaltim — Cek Pajak Kendaraan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark"><span>KT</span></div>
+    <div><strong>e-Pajak Kaltim</strong><small>Informasi Kendaraan Bermotor</small></div>
+  </div>
+  <div class="official"><span class="dot"></span> by RzqIzhm</div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="eyebrow"><span></span> SIMPATOR KALIMANTAN TIMUR</div>
+  <h1>Cek pajak kendaraan<br><em>dengan mudah.</em></h1>
+  <p class="lead">Masukkan nomor polisi kendaraan Anda untuk melihat informasi kendaraan, masa pajak, dan estimasi rincian pembayaran.</p>
+
+  <form id="checkForm" class="lookup">
+    <div class="plate-label">NOMOR POLISI</div>
+    <div class="plate">
+      <div class="kt">KT</div>
+      <div class="separator"></div>
+      <input id="nomor" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="—" autocomplete="off" required aria-label="Nomor polisi">
+      <div class="separator"></div>
+      <input id="seri" maxlength="3" placeholder="—" autocomplete="off" required aria-label="Seri kendaraan">
+    </div>
+    <button id="submitBtn" type="submit">
+      <span>Cek Sekarang</span>
+      <svg class="spinner" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" fill="none" stroke-width="2.5"/>
+      </svg>
+    </button>
+    <div class="hint">Contoh: <strong>KT 1234 ABC</strong></div>
+  </form>
+
+  <div class="trust">
+    <div><span class="check">✓</span><span><b>Data terhubung ke SimPaTor</b><small>Sumber data kendaraan Kalimantan Timur</small></span></div>
+    <div class="secure"><span class="lock">🔒</span><span><b>Privasi terjaga</b><small>Tidak menyimpan data pencarian</small></span></div>
+  </div>
+</section>
+
+<section id="message" class="message hidden" role="alert"></section>
+
+<section id="result" class="result hidden">
+  <div class="card-top">
+    <div>
+      <div class="section-label">INFORMASI KENDARAAN</div>
+      <h2 class="plate-title" id="rPlateTitle">—</h2>
+      <p id="rVehicle" class="vehicle-name">—</p>
+    </div>
+    <div id="rStatus" class="status">—</div>
+  </div>
+
+  <div class="info-grid">
+    <article><span>Pemilik</span><strong id="rNama">—</strong></article>
+    <article><span>Tahun Rakitan</span><strong id="rTahun">—</strong></article>
+    <article><span>Masa Pajak</span><strong id="rPajak">—</strong></article>
+    <article><span>Berlaku STNK</span><strong id="rStnk">—</strong></article>
+  </div>
+
+  <div class="tax-card">
+    <h3>Rincian Pajak</h3>
+    <div class="tax-rows">
+      <div><span>PKB Pokok</span><strong id="pkbPokok">—</strong></div>
+      <div><span>Denda PKB</span><strong id="pkbDenda">—</strong></div>
+      <div><span>SWDKLLJ Pokok</span><strong id="swdPokok">—</strong></div>
+      <div><span>Denda SWDKLLJ</span><strong id="swdDenda">—</strong></div>
+      <div><span>PNBP STNK</span><strong id="pnbpStnk">—</strong></div>
+      <div><span>PNBP Plat</span><strong id="pnbpPlat">—</strong></div>
+    </div>
+    <div class="tax-total"><span>Total Bayar</span><strong id="total">—</strong></div>
+  </div>
+
+  <details class="detail-tambahan" open>
+    <summary><span>Detail Tambahan</span><b>▾</b></summary>
+    <div class="extra">
+      <div><span>Kode Bayar</span><strong id="rKode">—</strong></div>
+      <div><span>Kepemilikan Ke-</span><strong id="rMilik">—</strong></div>
+      <div><span>Nomor Rangka</span><strong id="rNoka">—</strong></div>
+      <div><span>Nomor Mesin</span><strong id="rNosin">—</strong></div>
+      <div class="wide"><span>Alamat</span><strong id="rAlamat">—</strong></div>
+    </div>
+  </details>
+
+  <button id="resetBtn" class="secondary">← Cek Kendaraan Lain</button>
+</section>
+</main>
+
+<footer>
+  <div class="footer-brand"><div class="brand-mark small"><span>KT</span></div><strong>e-Pajak Kaltim</strong></div>
+  <p>Antarmuka informasi pihak ketiga yang memanfaatkan data dari SimPaTor Bapenda Provinsi Kalimantan Timur.</p>
+  <p class="copyright">Gunakan layanan resmi untuk konfirmasi dan transaksi pembayaran.</p>
+</footer>
+
+<script>
+const form = document.getElementById("checkForm");
+const btn = document.getElementById("submitBtn");
+const result = document.getElementById("result");
+const message = document.getElementById("message");
+const resetBtn = document.getElementById("resetBtn");
+const $ = id => document.getElementById(id);
+const set = (id, value) => $(id).textContent = value || "—";
+
+function showMessage(text){
+  message.textContent = text;
+  message.className = "message error";
+}
+function clearMessage(){
+  message.textContent = "";
+  message.className = "message hidden";
+}
+function getStatus(dateText){
+  if(!dateText) return "Terdaftar";
+  const parts = dateText.split("-");
+  if(parts.length !== 3) return "Terdaftar";
+  const date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T23:59:59`);
+  return Number.isNaN(date.getTime()) ? "Terdaftar" : (date >= new Date() ? "Aktif" : "Perlu Diperiksa");
+}
+function maskTail(str, keep){
+  if(!str) return "—";
+  const s = String(str).trim();
+  if(!s) return "—";
+  const head = s.slice(0, Math.min(keep, s.length));
+  const restLen = Math.max(s.length - head.length, 8);
+  return head + "*".repeat(restLen);
+}
+function maskAddress(str){
+  if(!str) return "—";
+  const s = String(str).trim();
+  if(!s) return "—";
+  const words = s.split(/\s+/);
+  const head = words.slice(0, 2).join(" ");
+  const restLen = Math.max(s.length - head.length, 20);
+  return head + "*".repeat(restLen);
+}
+
+$("nomor").addEventListener("input", e => e.target.value = e.target.value.replace(/\D/g,""));
+$("seri").addEventListener("input", e => e.target.value = e.target.value.replace(/[^a-z]/gi,"").toUpperCase());
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  clearMessage();
+  result.classList.add("hidden");
+  const nomor = $("nomor").value.trim();
+  const seri = $("seri").value.trim().toUpperCase();
+
+  btn.disabled = true;
+  btn.classList.add("loading");
+  btn.querySelector("span").textContent = "Memeriksa";
+
+  try{
+    const response = await fetch("/api/cek-pajak",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({nomor,seri})
+    });
+
+    const raw = await response.text();
+    let payload;
+    try{
+      payload = JSON.parse(raw);
+    }catch{
+      throw new Error("Server sedang bermasalah, coba beberapa saat lagi.");
+    }
+
+    if(!response.ok || !payload.ok) throw new Error(payload.message || "Data tidak dapat diperoleh.");
+
+    const d = payload.data;
+    set("rPlateTitle", `KT${seri} ${nomor}`);
+    set("rVehicle", [d.merek,d.tipe].filter(Boolean).join(" "));
+    set("rNama", d.namaPemilik);
+    set("rTahun", d.tahunRakitan);
+    set("rPajak", d.masaPajak);
+    set("rStnk", d.masaBerlakuStnk);
+    const status = getStatus(d.masaPajak);
+    set("rStatus", status);
+    $("rStatus").classList.toggle("inactive", status !== "Aktif");
+
+    set("pkbPokok", d.biaya.pkbPokok);
+    set("pkbDenda", d.biaya.pkbDenda);
+    set("swdPokok", d.biaya.swdklljPokok);
+    set("swdDenda", d.biaya.swdklljDenda);
+    set("pnbpStnk", d.biaya.pnbpStnk);
+    set("pnbpPlat", d.biaya.pnbpPlat);
+    set("total", d.biaya.total);
+
+    set("rKode", d.kodeBayar);
+    set("rMilik", d.kepemilikan);
+    set("rNoka", maskTail(d.nomorRangka, 3));
+    set("rNosin", maskTail(d.nomorMesin, 3));
+    set("rAlamat", maskAddress(d.alamatPemilik));
+
+    result.classList.remove("hidden");
+    result.scrollIntoView({behavior:"smooth",block:"start"});
+  }catch(err){
+    const isNetworkError = err instanceof TypeError;
+    const pesan = isNetworkError
+      ? "Tidak dapat terhubung ke server. Periksa koneksi internet Anda dan coba lagi."
+      : (err.message || "Terjadi kesalahan.");
+    showMessage(pesan);
+    message.scrollIntoView({behavior:"smooth",block:"center"});
+  }finally{
+    btn.disabled = false;
+    btn.classList.remove("loading");
+    btn.querySelector("span").textContent = "Cek Sekarang";
+  }
+});
+
+resetBtn.addEventListener("click",()=>{
+  result.classList.add("hidden");
+  clearMessage();
+  form.scrollIntoView({behavior:"smooth",block:"center"});
+  $("nomor").focus();
+});
+</script>
+</body>
+</html>
